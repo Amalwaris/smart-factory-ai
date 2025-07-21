@@ -14,3 +14,4 @@ data = {
 
 res = requests.post("http://localhost:5000/predict", json=data)
 print(res.json())
+#Added
