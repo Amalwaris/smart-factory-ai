@@ -56,8 +56,8 @@ def retrain():
     clf.fit(X, y_encoded)
     anomaly_model.fit(X)
 
-    joblib.dump(clf, "classifier.pkl")
-    joblib.dump(anomaly_model, "models/anomaly_detector.pkl")
-    joblib.dump(label_encoder, "models/encoder.pkl")
+    joblib.dump(clf, "./models/classifier.pkl")
+    joblib.dump(anomaly_model, "./models/anomaly_detector.pkl")
+    joblib.dump(label_encoder, "./models/encoder.pkl")
 
     return {"status": "Models retrained successfully"}
