@@ -1,13 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
-import pandas as pd
+from typing import List
 import numpy as np
 from app.model_utils import load_models
-import joblib
 
 app = FastAPI()
 
-clf, anomaly_model, label_encoder = load_models()
+clf, _, label_encoder = load_models()
 
 feature_columns = [
     'temperature',
@@ -25,16 +24,15 @@ class SensorData(BaseModel):
     noise_level: float
 
 @app.post("/predict")
-def predict(data: SensorData):
-    input_data = np.array([[getattr(data, col) for col in feature_columns]])
+def predict(data: List[SensorData]):
+    # Convert list of SensorData to numpy array
+    input_data = np.array([[getattr(d, col) for col in feature_columns] for d in data])
 
-    class_pred = clf.predict(input_data)[0]
-    class_label = label_encoder.inverse_transform([class_pred])[0]
+    # Predict classes
+    class_preds = clf.predict(input_data)
 
-    anomaly_pred = anomaly_model.predict(input_data)[0]
-    anomaly_status = "Anomaly" if anomaly_pred == -1 else "Normal"
+    # Decode class labels
+    class_labels = label_encoder.inverse_transform(class_preds)
 
-    return {
-        "maintenance_prediction": class_label,
-        "anomaly_status": anomaly_status
-    }
+    # Return list of maintenance predictions
+    return class_labels.tolist()
